@@ -1,0 +1,3 @@
+[submodule "datasets/sources_r"]
+	path = datasets/sources_r
+	url = https://github.com/maximehautin/hackathon_dge_gestion_des_flux.git
