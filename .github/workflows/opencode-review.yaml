@@ -28,9 +28,3 @@ jobs:
           GITHUB_ACTION_CONFIG.AUTO_REVIEW: "true"
           GITHUB_ACTION_CONFIG.AUTO_IMPROVE: "true"   # inline code suggestions
           GITHUB_ACTION_CONFIG.AUTO_DESCRIBE: "false"
-          PR_REVIEWER.EXTRA_INSTRUCTIONS: >-
-            Focus on bugs, security issues, missing tests, and unclear code.
-            Be concise. Don't comment on style that the linter already enforces.
-          PR_CODE_SUGGESTIONS.EXTRA_INSTRUCTIONS: >-
-            Only suggest fixes for bugs, security issues, and unclear code.
-            Skip style issues the linter already enforces.
