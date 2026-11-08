@@ -23,7 +23,7 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          model: openrouter/~deepseek/deepseek-flash-latest
+          model: ~deepseek/deepseek-flash-latest
           use_github_token: true
           prompt: |
             Review this pull request (#${{ github.event.pull_request.number }}).
