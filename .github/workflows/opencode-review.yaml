@@ -23,7 +23,7 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          model: opencode/deepseek-v4.1-flash-free
+          model: openrouter/openrouter/free
           use_github_token: true
           prompt: |
             Review this pull request (#${{ github.event.pull_request.number }}).
