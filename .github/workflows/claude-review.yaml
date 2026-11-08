@@ -5,6 +5,7 @@ on:
 
 jobs:
   review:
+    if: contains(github.event.comment.body, '@claude-review') || contains(github.event.review.body, '@claude-review')
     runs-on: ubuntu-latest
     permissions:
       contents: read

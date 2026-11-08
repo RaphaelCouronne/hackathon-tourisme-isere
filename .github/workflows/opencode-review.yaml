@@ -1,16 +1,16 @@
-name: opencode-review
+name: pr-agent-review
 
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
 
 concurrency:
-  group: opencode-review-${{ github.event.pull_request.number }}
+  group: pr-agent-review-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
   review:
-    if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == false && github.event.sender.type != 'Bot'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -18,16 +18,19 @@ jobs:
       issues: write
     steps:
       - uses: actions/checkout@v6
-      - uses: anomalyco/opencode/github@latest
+      - uses: qodo-ai/pr-agent@main   # pin to a release tag/SHA in practice
         env:
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          model: deepseek/deepseek-v4.1-flash-1017
-          use_github_token: true
-          prompt: |
-            Review this pull request (#${{ github.event.pull_request.number }}).
+          OPENROUTER.KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          CONFIG.MODEL: openrouter/deepseek/deepseek-v4.1-flash-1017
+          CONFIG.FALLBACK_MODELS: '["openrouter/deepseek/deepseek-v4.1-flash-1017"]'
+          CONFIG.CUSTOM_MODEL_MAX_TOKENS: "128000"   # needed for models PR-Agent doesn't know
+          GITHUB_ACTION_CONFIG.AUTO_REVIEW: "true"
+          GITHUB_ACTION_CONFIG.AUTO_IMPROVE: "true"   # inline code suggestions
+          GITHUB_ACTION_CONFIG.AUTO_DESCRIBE: "false"
+          PR_REVIEWER.EXTRA_INSTRUCTIONS: >-
             Focus on bugs, security issues, missing tests, and unclear code.
-            Be concise. Post inline comments on specific lines and a short
-            summary comment at the end. Don't comment on style that the
-            linter already enforces.
+            Be concise. Don't comment on style that the linter already enforces.
+          PR_CODE_SUGGESTIONS.EXTRA_INSTRUCTIONS: >-
+            Only suggest fixes for bugs, security issues, and unclear code.
+            Skip style issues the linter already enforces.
