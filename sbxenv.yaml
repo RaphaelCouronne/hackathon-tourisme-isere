@@ -1,0 +1,71 @@
+# Ref: <https://docs.docker.com/ai/sandboxes/configuration/environment-files/>
+schemaVersion: '1'
+agent: opencode
+
+args:
+  # Github auth/signing
+  ghUser:
+    required: true
+    pattern: '^[A-Za-z0-9-]*$'
+    description: 'Github user account (authenticated via gh, empty is active account)'
+  gitName:
+    required: true
+    description: 'User name for Git commits'
+  gitEmail:
+    required: true
+    description: 'User email for Git commits'
+  # OpenCode
+  hostPort:
+    required: true
+    description: 'Host port for OpenCode service'
+  defaultModel:
+    default: 'lbrouter/deepseek-v4.1-flash:free'
+    description: 'Default model for OpenCode CLI'
+  opencodeApiKey:
+    default: ''
+    description: 'API key for OpenCode Console'
+  # Paths (relative to this file)
+  kitsDir:
+    default: './sbx-kits-contrib'
+    description: 'Directory for SBX kits'
+  dataDir:
+    default: '../onyxia-data'
+    description: 'Directory for project data'
+
+entrypoint: ['opencode'] # or "/bin/bash"
+# cmd: ["pair", "--url", "http://127.0.0.1:${{ env.args.hostPort }}"]
+
+kits:
+  - source: ${{ env.args.kitsDir }}/opencode
+    args:
+      model: ${{ env.args.defaultModel }}
+  # mixins
+  - ${{ env.args.kitsDir }}/github-ssh
+  - ${{ env.args.kitsDir }}/github-config
+  - source: ${{ env.args.kitsDir }}/git-ssh-sign
+    args:
+      gitName: ${{ env.args.gitName }}
+      gitEmail: ${{ env.args.gitEmail }}
+
+ports:
+  - sandbox: 4123
+    host: ${{ env.args.hostPort }}
+    hostIP: 0.0.0.0
+
+secrets:
+  github:
+    command: gh auth token -u "${{ env.args.ghUser }}"
+    snapshot: true # cache command value
+
+env:
+  OPENCODE_API_KEY: ${{ env.args.opencodeApiKey }} # reverse-proxy does NOT work for this one
+
+workspace:
+  path: ${{ env.projectDir }}
+  # target: /home/agent/workspace # not available yet, cf. <https://github.com/docker/sandbox-kit-spec/issues/215>
+  # clone: true
+
+additionalWorkspaces:
+  - path: ${{ env.args.dataDir }}
+    target: ${{ env.projectDir }}/../onyxia-data
+    readOnly: true
